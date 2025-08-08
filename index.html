@@ -1,40 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Donut</title>
-<style>
-body{margin:0;background:#000;color:#ebcb8b;font-family:monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh}
-pre{height:700px;display:flex;align-items:center;justify-content:center}
-button{margin-top:20px;padding:12px 23px;font-weight:600;font-size:large;background:#abb2bf;border:none;color:#000;cursor:pointer}
-</style>
+  <meta charset="UTF-8" />
+  <title>Beep Music Player</title>
+  <style>
+    body {
+      background: black;
+      color: lime;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
-<pre id="d"></pre>
-<button onclick="a()">Spin donut</button>
-<script>
-let d=document.getElementById("d"),t=null,p=0,q=0;
-function f(){
-let b=[],z=[];
-p+=.07,q+=.03;
-let ct=Math.cos(p),st=Math.sin(p),cp=Math.cos(q),sp=Math.sin(q);
-for(let k=0;k<1760;k++){b[k]=k%80==79?"\n":" ";z[k]=0}
-for(let j=0;j<6.28;j+=.07){
-let ctj=Math.cos(j),stj=Math.sin(j);
-for(let i=0;i<6.28;i+=.02){
-let si=Math.sin(i),ci=Math.cos(i),x=ctj+2,y=si*x,z0=stj,zz=si*x*st+z0*ct+5,D=1/zz,
-t=si*x*ct-z0*st,
-x2=0|(40+30*D*(ci*x*cp-t*sp)),
-y2=0|(12+15*D*(ci*x*sp+t*cp)),
-o=x2+80*y2,
-N=0|8*((z0*st-si*ctj*ct)*cp-si*ctj*st-z0*ct-ci*ctj*sp);
-if(y2<22&&y2>=0&&x2>=0&&x2<79&&D>z[o]){z[o]=D;b[o]=".,~:;=!*#$@"[N>0?N:0]}
-}}
-d.innerHTML=b.join("")
-}
-function a(){
-if(t===null)t=setInterval(f,50);else clearInterval(t),t=null
-}
-</script>
+  <h1>Playing Beep Music...</h1>
+  <script>
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playBeep(frequency, duration) {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+
+      oscillator.frequency.value = frequency;
+      oscillator.type = "sine";
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+
+      oscillator.start();
+      gain.gain.setValueAtTime(1, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration / 1000);
+      oscillator.stop(context.currentTime + duration / 1000);
+    }
+
+    // Format: [frequency, duration(ms)]
+    const notes = [
+      [440, 300], [494, 300], [523, 300], [0, 100],
+      [440, 300], [0, 100], [440, 300], [349, 300],
+      [392, 300], [440, 300], [0, 300],
+    ];
+
+    async function playSong(songNotes) {
+      for (const [freq, dur] of songNotes) {
+        if (freq > 0) playBeep(freq, dur);
+        await new Promise(r => setTimeout(r, dur));
+      }
+    }
+
+    window.addEventListener('load', () => {
+      playSong(notes);
+    });
+  </script>
 </body>
 </html>
